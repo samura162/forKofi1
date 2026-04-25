@@ -275,8 +275,8 @@
                 const rad = p.rad ?? 0;
                 let sideHtml = "";
 if (p.isPartner) {
-    sideHtml += `<div class="side-item"><span class="side-label" style="color:#00bcd4">CMD A</span><button class="btn-side" onclick="changeValue('${target}/tax1',-1)">-</button><span class="side-val" style="color:#00bcd4">${p.tax1??0}</span><button class="btn-side" onclick="changeValue('${target}/tax1',1)">+</button></div>`;
-    sideHtml += `<div class="side-item"><span class="side-label" style="color:#00bcd4">CMD B</span><button class="btn-side" onclick="changeValue('${target}/tax2',-1)">-</button><span class="side-val" style="color:#00bcd4">${p.tax2??0}</span><button class="btn-side" onclick="changeValue('${target}/tax2',1)">+</button></div>`;
+    sideHtml += `<div class="side-item"><span class="side-label" style="color:#00bcd4">CMD A Casts</span><button class="btn-side" onclick="changeValue('${target}/tax1',-1)">-</button><span class="side-val" style="color:#00bcd4">${p.tax1??0}</span><button class="btn-side" onclick="changeValue('${target}/tax1',1)">+</button></div>`;
+    sideHtml += `<div class="side-item"><span class="side-label" style="color:#00bcd4">CMD B Casts</span><button class="btn-side" onclick="changeValue('${target}/tax2',-1)">-</button><span class="side-val" style="color:#00bcd4">${p.tax2??0}</span><button class="btn-side" onclick="changeValue('${target}/tax2',1)">+</button></div>`;
 } else {
     sideHtml += `<div class="side-item"><span class="side-label" style="color:#00bcd4">CMD Casts</span><button class="btn-side" onclick="changeValue('${target}/tax1',-1)">-</button><span class="side-val" style="color:#00bcd4">${p.tax1??0}</span><button class="btn-side" onclick="changeValue('${target}/tax1',1)">+</button></div>`;
 }
