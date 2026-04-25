@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Samura's MTG Commander Life Counter</title>
+    <link rel="icon" href="favicon.png" type="image/png">
+    <style>
+        * { box-sizing: border-box; }
+        html, body { 
+            margin: 0; padding: 0; height: 100%; width: 100%; 
+            background: #111; color: #fff; font-family: sans-serif; 
+            overflow: hidden; transition: background 0.5s ease;
+        }
+        body.state-day { background: #4a3a05; }
+        body.state-night { background: #1a1b3a; }
+        body.state-none { background: #111; }
+
+        .app-header {
+            height: 4vh; display: flex; justify-content: space-between; 
+            align-items: center; padding: 0 10px; background: rgba(0, 0, 0, 0.8);
+        }
+        .header-btns { display: flex; gap: 5px; align-items: center; }
+        .day-night-select {
+            background: #333; color: #fff; border: 1px solid #444; 
+            border-radius: 4px; font-size: 0.7rem; padding: 2px; outline: none;
+        }
+        .reset-btn, .order-btn {
+            border: none; border-radius: 4px; padding: 2px 8px; 
+            font-size: 0.7rem; cursor: pointer; color: #fff;
+        }
+        .reset-btn { background: #444; }
+        .order-btn { background: #2e7d32; }
+
+        .grid { 
+            display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; 
+            height: 96vh; width: 100%; gap: 2px; padding: 2px;
+        }
+        /* Slot arrangement: 1 (top left), 2 (top right), 3 (bottom right), 4 (bottom left) in a clockwise direction. */
+
+        #slot-P1 { grid-area: 1 / 1 / 2 / 2; }
+        #slot-P2 { grid-area: 1 / 2 / 2 / 3; }
+        #slot-P3 { grid-area: 2 / 2 / 3 / 3; }
+        #slot-P4 { grid-area: 2 / 1 / 3 / 2; }
+
+        .player-box { 
+            background: rgba(34, 34, 34, 0.7); display: flex; flex-direction: column; 
+            justify-content: space-around; padding: 2px; border: 1px solid #333; 
+            overflow: hidden; transition: background 0.2s;
+        }
+        .player-box.shuffling { background: #444; }
+        .header-area { display: flex; align-items: center; height: 10%; padding: 0 2px; gap: 4px; width: 100%; }
+        .order-num { font-size: 1rem; font-weight: bold; color: #666; flex-shrink: 0; }
+        .partner-wrapper { display: flex; align-items: center; gap: 1px; font-size: 0.6rem; color: #888; white-space: nowrap; flex-shrink: 0; }
+        .name-select { background: transparent; color: #ddd; border: none; font-size: 0.85rem; font-weight: bold; outline: none; flex-grow: 1; min-width: 0; }
+        .main-display-wrapper { height: 45%; display: flex; align-items: center; justify-content: center; gap: 2px; width: 100%; }
+        .life-center-unit { display: flex; flex-direction: column; align-items: center; width: 62%; height: 100%; justify-content: space-around; }
+        .life-wrapper { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; height: 55%; }
+        .life { font-size: 10vh; font-weight: bold; border: none; background: transparent; width: 100%; text-align: center; outline: none; padding: 0; transition: color 0.3s; }
+        .life.small-font { font-size: 7vh; }
+        .life-btn-group { display: flex; justify-content: center; gap: 10px; width: 100%; height: 28%; }
+        .btn-life { flex: 1; max-width: 80px; height: 100%; font-size: 1.3rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; }
+        .btn-minus { background: #d32f2f; color: #fff; }
+        .btn-plus { background: #388e3c; color: #fff; }
+        .num-select { background: #333; color: #fff; border: 1px solid #444; font-size: 0.7rem; width: 90%; border-radius: 4px; height: 15%; }
+        .sidebar-counters { display: flex; flex-direction: column; gap: 2px; width: 36%; height: 100%; justify-content: center; }
+        .side-item { background: rgba(26, 26, 26, 0.8); border: 1px solid #333; border-radius: 4px; padding: 1px 2px; display: flex; align-items: center; justify-content: space-between; }
+        .side-label { font-size: 0.4rem; white-space: nowrap; width: 22px; font-weight: bold; }
+        .side-val { font-weight: bold; font-size: 0.8rem; min-width: 12px; text-align: center; transition: color 0.3s; }
+        .btn-side { width: 16px; height: 16px; background: #333; border: none; color: #fff; border-radius: 2px; cursor: pointer; font-size: 0.6rem; }
+        .side-dice-wrapper { background: rgba(17, 17, 17, 0.8); border: 1px solid #333; border-radius: 4px; padding: 2px; display: flex; flex-direction: column; gap: 2px; margin-top: 1px; }
+        .side-dice-input-row { display: flex; gap: 1px; align-items: center; justify-content: space-between; }
+        .dice-input { width: 55%; background: transparent; border: none; color: #aaa; font-size: 0.6rem; text-align: center; border-bottom: 1px solid #444; outline: none; }
+        .dice-btn { background: #333; color: #fff; border: none; font-size: 0.5rem; padding: 2px 4px; border-radius: 2px; cursor: pointer; }
+        .dice-res-row { display: flex; justify-content: space-around; align-items: center; height: 12px; }
+        .dice-format { font-size: 0.35rem; color: #555; }
+        .dice-result { color: #ffeb3b; font-weight: bold; font-size: 0.75rem; min-width: 15px; }
+        
+        .commander-area { height: 45%; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px; padding: 2px; }
+        /* Clockwise placement setting within the damage area received from the commander. */
+        .cmd-pos-0 { grid-area: 1 / 1 / 2 / 2; } /* from P1 */
+        .cmd-pos-1 { grid-area: 1 / 2 / 2 / 3; } /* from P2 */
+        .cmd-pos-2 { grid-area: 2 / 2 / 3 / 3; } /* from P3 */
+        .cmd-pos-3 { grid-area: 2 / 1 / 3 / 2; } /* from P4 */
+
+        .cmd-box { background: rgba(26, 26, 26, 0.8); padding: 2px; border-radius: 2px; font-size: 0.5rem; display: flex; flex-direction: column; overflow: hidden; border: 1px solid transparent; }
+        .cmd-box.is-self { opacity: 0.4; border: 1px dashed #333; }
+        .cmd-header { display: flex; align-items: center; gap: 2px; border-bottom: 1px solid #333; padding-bottom: 1px; margin-bottom: 1px; }
+        .cmd-order { color: #555; font-weight: bold; }
+        .cmd-name-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1; color: #aaa; font-size: 0.4rem; }
+        .cmd-body { display: flex; justify-content: space-around; flex-grow: 1; align-items: center; }
+        .cmd-unit { display: flex; flex-direction: column; align-items: center; gap: 1px; width: 48%; }
+        .cmd-side-label { color: #444; font-size: 0.4rem; line-height: 1; }
+        .cmd-val-wrap { display: flex; align-items: center; gap: 1px; }
+        .cmd-val { font-size: 0.8rem; font-weight: bold; min-width: 12px; text-align: center; transition: color 0.3s; }
+        .btn-cmd { width: 14px; height: 14px; font-size: 0.6rem; background: #333; color: #fff; border: none; border-radius: 2px; cursor: pointer; }
+    </style>
+</head>
+<body class="state-none">
+
+    <div class="app-header">
+        <span style="font-size:0.8rem; font-weight:bold; color:#777;">Samura's MTG Commander Life Counter</span>
+        <div class="header-btns">
+            <select id="day-night-ctrl" class="day-night-select" onchange="directInput('dayNight', this.value)">
+                <option value="none">Day/Night:None</option>
+                <option value="day">Day</option>
+                <option value="night">Night</option>
+            </select>
+            <button class="order-btn" onclick="shuffleNames()">Turn order shuffle</button>
+            <button class="reset-btn" onclick="resetGame()">Reset</button>
+        </div>
+    </div>
+    <div class="grid" id="main-grid"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+  apiKey: "AIzaSyD8NVtwX1BstPjM12cqNJliI5Tziq4xYRU",
+  authDomain: "forkofi1-5ee89.firebaseapp.com",
+  projectId: "forkofi1-5ee89",
+  storageBucket: "forkofi1-5ee89.firebasestorage.app",
+  messagingSenderId: "49144212904",
+  appId: "1:49144212904:web:1853da8be7e7fa0ed3c19d"
+};
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const rootRef = db.ref('mtg/edh-session-final-v20');
+        const memberRef = db.ref('mtg/members');
+
+        const playerSlots = ['P1', 'P2', 'P3', 'P4'];
+        const grid = document.getElementById('main-grid');
+
+        playerSlots.forEach((slot, index) => {
+            let html = `
+                <div class="player-box" id="slot-${slot}">
+                    <div class="header-area">
+                        <span class="order-num">${index + 1}</span>
+                        <div class="partner-wrapper">
+                            <input type="checkbox" id="check-${slot}" class="partner-check" onchange="directInput('${slot}/isPartner', this.checked)">
+                            <label for="check-${slot}">partner</label>
+                        </div>
+                        <select id="name-${slot}" class="name-select" onchange="if(this.value!=='') directInput('${slot}/name', this.value)">
+                            <option value="">select nickname</option>
+                        </select>
+                    </div>
+                    <div class="main-display-wrapper">
+                        <div class="life-center-unit">
+                            <div class="life-wrapper"><input type="number" id="life-${slot}" class="life" value="40" onchange="directInput('${slot}/life', parseInt(this.value))"></div>
+                            <div class="life-btn-group">
+                                <button class="btn-life btn-minus" onclick="changeValue('${slot}/life', -1)">-1</button>
+                                <button class="btn-life btn-plus" onclick="changeValue('${slot}/life', 1)">+1</button>
+                            </div>
+                            <select class="num-select" onchange="if(this.value !== '') { directInput('${slot}/life', parseInt(this.value)); this.value = ''; }">
+                                <option value="">from list</option>
+                                ${Array.from({length:150}, (_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="sidebar-counters">
+                            <div id="side-main-${slot}"></div>
+                            <div class="side-dice-wrapper">
+                                <div class="side-dice-input-row">
+                                    <input type="text" id="dice-in-${slot}" class="dice-input" value="1d20" placeholder="1d20">
+                                    <button class="dice-btn" onclick="triggerDice('${slot}')">dice roll</button>
+                                </div>
+                                <div class="dice-res-row">
+                                    <div id="dice-fmt-${slot}" class="dice-format"></div>
+                                    <div id="dice-res-${slot}" class="dice-result">--</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="commander-area" id="cmd-area-${slot}"></div>
+                </div>`;
+            grid.insertAdjacentHTML('beforeend', html);
+        });
+
+        function getDynamicColor(val, type) {
+            if (type === 'life') {
+                if (val <= 0) return "#f44336";
+                return `hsl(${Math.min(1, val / 40) * 120}, 100%, 60%)`;
+            } else if (type === 'cmd') {
+                if (val >= 21) return "#ff00ff";
+                return `hsl(${120 - (Math.min(1, val / 21) * 120)}, 100%, 60%)`;
+            } else if (type === 'poison') {
+                if (val <= 0) return "#888";
+                if (val >= 10) return "#ff00ff";
+                return `hsl(${Math.max(0, 120 - (val * 12))}, 100%, 60%)`;
+            }
+            return "#888";
+        }
+
+        window.resetGame = () => {
+            if (!confirm("Do you want to initialize?")) return;
+            playerSlots.forEach(slot => {
+                rootRef.child(slot).update({ life: 40, poison: 0, rad: 0, tax1: 0, tax2: 0, cmd: null });
+            });
+            rootRef.update({ dayNight: "none" });
+        };
+
+        window.shuffleNames = () => {
+            const currentNames = playerSlots.map(slot => document.getElementById(`name-${slot}`).value).filter(n => n !== "");
+            if (currentNames.length < 2) return alert("Please select two or more nicknames.");
+            playerSlots.forEach(s => document.getElementById(`slot-${s}`).classList.add('shuffling'));
+            let count = 0;
+            const interval = setInterval(() => {
+                playerSlots.forEach(slot => {
+                    const sel = document.getElementById(`name-${slot}`);
+                    sel.value = currentNames[Math.floor(Math.random() * currentNames.length)];
+                });
+                if (++count >= 15) {
+                    clearInterval(interval);
+                    const shuffled = [...currentNames].sort(() => Math.random() - 0.5);
+                    playerSlots.forEach((slot, i) => {
+                        directInput(`${slot}/name`, shuffled[i] || "");
+                        document.getElementById(`slot-${slot}`).classList.remove('shuffling');
+                    });
+                }
+            }, 80);
+        };
+
+        window.triggerDice = (slot) => {
+            const input = document.getElementById(`dice-in-${slot}`);
+            const match = input.value.toLowerCase().match(/^(\d+)d(\d+)$/);
+            if (!match) return;
+            directInput(`${slot}/diceFormat`, input.value);
+            let r = 0;
+            const itv = setInterval(() => {
+                const tmp = Array.from({length:match[1]},()=>Math.floor(Math.random()*match[2])+1).reduce((a,b)=>a+b);
+                directInput(`${slot}/diceResult`, tmp);
+                if (++r > 8) clearInterval(itv);
+            }, 80);
+            input.blur();
+        };
+
+        memberRef.on('value', s => {
+            const m = s.val() || [];
+            playerSlots.forEach(slot => {
+                const sel = document.getElementById(`name-${slot}`);
+                const cur = sel.value;
+                sel.innerHTML = '<option value="">select nickname</option>' + m.map(v => `<option value="${v}">${v}</option>`).join('');
+                if(cur) sel.value = cur;
+            });
+        });
+
+        rootRef.on('value', s => {
+            const d = s.val() || {};
+            const dnState = d.dayNight || "none";
+            const dnSelect = document.getElementById('day-night-ctrl');
+            if (dnSelect && document.activeElement !== dnSelect) dnSelect.value = dnState;
+            document.body.className = `state-${dnState}`;
+
+            playerSlots.forEach((target, targetIdx) => {
+                const p = d[target] || {};
+                const nameSel = document.getElementById(`name-${target}`);
+                if (nameSel && document.activeElement !== nameSel) nameSel.value = p.name || "";
+                const check = document.getElementById(`check-${target}`);
+                if (check) check.checked = !!p.isPartner;
+
+                document.getElementById(`dice-fmt-${target}`).innerText = p.diceFormat || "";
+                document.getElementById(`dice-res-${target}`).innerText = p.diceResult || "--";
+                
+                const lifeIn = document.getElementById(`life-${target}`);
+                if (lifeIn && document.activeElement !== lifeIn) {
+                    const lifeVal = p.life ?? 40;
+                    lifeIn.value = lifeVal;
+                    lifeIn.style.color = getDynamicColor(lifeVal, 'life');
+                    lifeIn.classList.toggle('small-font', lifeVal >= 100);
+                }
+                
+                const poi = p.poison ?? 0;
+                const rad = p.rad ?? 0;
+                let sideHtml = `<div class="side-item"><span class="side-label" style="color:#00bcd4">CMD Casts</span><button class="btn-side" onclick="changeValue('${target}/tax1',-1)">-</button><span class="side-val" style="color:#00bcd4">${p.tax1??0}</span><button class="btn-side" onclick="changeValue('${target}/tax1',1)">+</button></div>`;
+                if(p.isPartner) sideHtml += `<div class="side-item"><span class="side-label" style="color:#00bcd4">CMD Casts</span><button class="btn-side" onclick="changeValue('${target}/tax2',-1)">-</button><span class="side-val" style="color:#00bcd4">${p.tax2??0}</span><button class="btn-side" onclick="changeValue('${target}/tax2',1)">+</button></div>`;
+                sideHtml += `<div class="side-item"><span class="side-label" style="color:#adff2f">Poison</span><button class="btn-side" onclick="changeValue('${target}/poison',-1)">-</button><span class="side-val" style="color:${getDynamicColor(poi, 'poison')}">${poi}</span><button class="btn-side" onclick="changeValue('${target}/poison',1)">+</button></div><div class="side-item"><span class="side-label" style="color:#ffeb3b">RAD</span><button class="btn-side" onclick="changeValue('${target}/rad',-1)">-</button><span class="side-val" style="color:${rad>0?'#ffeb3b':'#888'}">${rad}</span><button class="btn-side" onclick="changeValue('${target}/rad',1)">+</button></div>`;
+                document.getElementById(`side-main-${target}`).innerHTML = sideHtml;
+
+                const cmdArea = document.getElementById(`cmd-area-${target}`);
+                if (cmdArea) {
+                    cmdArea.innerHTML = '';
+                    playerSlots.forEach((from, fromIdx) => {
+                        const fromData = d[from] || {};
+                        const fromIsP = !!fromData.isPartner;
+                        const v1 = p.cmd?.[from]?.v1 ?? 0;
+                        const v2 = p.cmd?.[from]?.v2 ?? 0;
+                        const isSelf = (from === target);
+                        
+                        // Here, we provide the cmd-pos-X class to achieve clockwise rotation.
+
+                        let boxHtml = `<div class="cmd-box cmd-pos-${fromIdx} ${isSelf ? 'is-self' : ''}">
+                            <div class="cmd-header"><span class="cmd-order">${fromIdx+1}</span><span class="cmd-name-label">${fromData.name||from} Damage from CMD</span></div>
+                            <div class="cmd-body">
+                                <div class="cmd-unit">${fromIsP?'<span class="cmd-side-label">A</span>':''}<div class="cmd-val-wrap"><button class="btn-cmd" onclick="changeValue('${target}/cmd/${from}/v1',-1)">-</button><span class="cmd-val" style="color:${getDynamicColor(v1, 'cmd')}">${v1}</span><button class="btn-cmd" onclick="changeValue('${target}/cmd/${from}/v1',1)">+</button></div></div>
+                                ${fromIsP?`<div class="cmd-unit"><span class="cmd-side-label">B</span><div class="cmd-val-wrap"><button class="btn-cmd" onclick="changeValue('${target}/cmd/${from}/v2',-1)">-</button><span class="cmd-val" style="color:${getDynamicColor(v2, 'cmd')}">${v2}</span><button class="btn-cmd" onclick="changeValue('${target}/cmd/${from}/v2',1)">+</button></div></div>`:''}
+                            </div></div>`;
+                        cmdArea.insertAdjacentHTML('beforeend', boxHtml);
+                    });
+                }
+            });
+        });
+
+        window.changeValue = (path, delta) => {
+            rootRef.child(path).transaction(c => {
+                if (c === null) return (path.includes('life') ? 40 : 0) + delta;
+                return c + delta;
+            });
+        };
+        window.directInput = (path, value) => rootRef.child(path).set(value);
+    </script>
+</body>
+</html>
