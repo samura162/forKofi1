@@ -8,91 +8,82 @@
     <style>
         * { box-sizing: border-box; }
         html, body { 
-            margin: 0; padding: 0; height: 100%; width: 100%; 
+            margin: 0; padding: 0; height: 100vh; width: 100vw; 
             background: #111; color: #fff; font-family: sans-serif; 
-            overflow: hidden; transition: background 0.5s ease;
+            overflow: hidden; /* 対面使用時に画面が動かないよう固定 */
         }
-        /* 背景色の定義：!importantを使用して確実に適用 */
-        body.state-none { background: #111 !important; }
-        body.state-day { background: #4a3a05 !important; }
-        body.state-night { background: #1a1b3a !important; }
 
+        /* 4分割レイアウトを維持 */
+        .grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            grid-template-rows: 1fr 1fr; 
+            height: 96vh; /* ヘッダー分を引いた全画面 */
+            width: 100%; 
+            gap: 4px; 
+            padding: 4px;
+        }
+
+        /* 各プレイヤーボックス：潰れないように最小高さを設定 */
+        .player-box { 
+            background: rgba(34, 34, 34, 0.7); 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; /* 要素を上下いっぱいに配置 */
+            padding: 4px; 
+            border: 1px solid #333; 
+            overflow: hidden; 
+            min-height: 0; /* グリッド内での圧縮を許可しつつ、中身で調整 */
+        }
+
+        /* ライフ表示：フォントサイズを画面高に対して最適化 */
+        .main-display-wrapper { 
+            flex: 2; /* ライフエリアを優先的に広く取る */
+            display: flex; 
+            align-items: center; 
+            justify-content: space-around; 
+            gap: 2px;
+            min-height: 0;
+        }
+        .life { 
+            font-size: 15vh !important; /* 画面の高さに合わせて巨大化 */
+            font-weight: bold; 
+            border: none; 
+            background: transparent; 
+            color: #fff; 
+            width: 100%; 
+            text-align: center; 
+            outline: none; 
+        }
+
+        /* サイドバーとコマンダーエリア：文字が被らないようサイズ調整 */
+        .sidebar-counters { width: 35%; display: flex; flex-direction: column; gap: 2px; }
+        .side-item { font-size: 0.7rem; padding: 2px; }
+        
+        .commander-area { 
+            flex: 1.5; /* コマンダーダメージエリア */
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            grid-template-rows: 1fr 1fr; 
+            gap: 2px; 
+        }
+        .cmd-box { font-size: 0.6rem; padding: 2px; border: 1px solid #444; }
+
+        /* ヘッダー */
         .app-header {
             height: 4vh; display: flex; justify-content: space-between; 
             align-items: center; padding: 0 10px; background: rgba(0, 0, 0, 0.8);
         }
-        .header-btns { display: flex; gap: 5px; align-items: center; }
-        .day-night-select {
-            background: #333; color: #fff; border: 1px solid #444; 
-            border-radius: 4px; font-size: 0.7rem; padding: 2px; outline: none;
-        }
-        .reset-btn, .order-btn {
-            border: none; border-radius: 4px; padding: 2px 8px; 
-            font-size: 0.7rem; cursor: pointer; color: #fff;
-        }
-        .reset-btn { background: #444; }
-        .order-btn { background: #2e7d32; }
-
-        .grid { 
-            display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; 
-            height: 96vh; width: 100%; gap: 2px; padding: 2px;
-        }
-
-        #slot-P1 { grid-area: 1 / 1 / 2 / 2; }
-        #slot-P2 { grid-area: 1 / 2 / 2 / 3; }
-        #slot-P3 { grid-area: 2 / 2 / 3 / 3; }
-        #slot-P4 { grid-area: 2 / 1 / 3 / 2; }
-
-        .player-box { 
-            background: rgba(34, 34, 34, 0.7); display: flex; flex-direction: column; 
-            justify-content: space-around; padding: 2px; border: 1px solid #333; 
-            overflow: hidden; transition: background 0.2s;
-        }
-        .player-box.shuffling { background: #444; }
-        .header-area { display: flex; align-items: center; height: 10%; padding: 0 2px; gap: 4px; width: 100%; }
-        .order-num { font-size: 1rem; font-weight: bold; color: #666; flex-shrink: 0; }
-        .partner-wrapper { display: flex; align-items: center; gap: 1px; font-size: 0.6rem; color: #888; white-space: nowrap; flex-shrink: 0; }
-        .name-select { background: transparent; color: #ddd; border: none; font-size: 0.85rem; font-weight: bold; outline: none; flex-grow: 1; min-width: 0; }
-        .main-display-wrapper { height: 45%; display: flex; align-items: center; justify-content: center; gap: 2px; width: 100%; }
-        .life-center-unit { display: flex; flex-direction: column; align-items: center; width: 62%; height: 100%; justify-content: space-around; }
-        .life-wrapper { width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; height: 55%; }
-        .life { font-size: 10vh; font-weight: bold; border: none; background: transparent; color: #fff; width: 100%; text-align: center; outline: none; padding: 0; transition: color 0.3s; }
-        .life.small-font { font-size: 7vh; }
-        .life-btn-group { display: flex; justify-content: center; gap: 10px; width: 100%; height: 28%; }
-        .btn-life { flex: 1; max-width: 80px; height: 100%; font-size: 1.3rem; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; }
+        
+        /* 共通ボタン */
+        .btn-life { height: 35px; font-size: 1.1rem; }
         .btn-minus { background: #d32f2f; color: #fff; }
         .btn-plus { background: #388e3c; color: #fff; }
-        .num-select { background: #333; color: #fff; border: 1px solid #444; font-size: 0.7rem; width: 90%; border-radius: 4px; height: 15%; }
-        .sidebar-counters { display: flex; flex-direction: column; gap: 2px; width: 36%; height: 100%; justify-content: center; }
-        .side-item { background: rgba(26, 26, 26, 0.8); border: 1px solid #333; border-radius: 4px; padding: 1px 2px; display: flex; align-items: center; justify-content: space-between; }
-        .side-label { font-size: 0.4rem; white-space: nowrap; width: 22px; font-weight: bold; }
-        .side-val { font-weight: bold; font-size: 0.8rem; min-width: 12px; text-align: center; transition: color 0.3s; }
-        .btn-side { width: 16px; height: 16px; background: #333; border: none; color: #fff; border-radius: 2px; cursor: pointer; font-size: 0.6rem; }
-        .side-dice-wrapper { background: rgba(17, 17, 17, 0.8); border: 1px solid #333; border-radius: 4px; padding: 2px; display: flex; flex-direction: column; gap: 2px; margin-top: 1px; }
-        .side-dice-input-row { display: flex; gap: 1px; align-items: center; justify-content: space-between; }
-        .dice-input { width: 55%; background: transparent; border: none; color: #aaa; font-size: 0.6rem; text-align: center; border-bottom: 1px solid #444; outline: none; }
-        .dice-btn { background: #333; color: #fff; border: none; font-size: 0.5rem; padding: 2px 4px; border-radius: 2px; cursor: pointer; }
-        .dice-res-row { display: flex; justify-content: space-around; align-items: center; height: 12px; }
-        .dice-format { font-size: 0.35rem; color: #555; }
-        .dice-result { color: #ffeb3b; font-weight: bold; font-size: 0.75rem; min-width: 15px; }
-        
-        .commander-area { height: 45%; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px; padding: 2px; }
-        .cmd-pos-0 { grid-area: 1 / 1 / 2 / 2; } 
-        .cmd-pos-1 { grid-area: 1 / 2 / 2 / 3; } 
-        .cmd-pos-2 { grid-area: 2 / 2 / 3 / 3; } 
-        .cmd-pos-3 { grid-area: 2 / 1 / 3 / 2; } 
 
-        .cmd-box { background: rgba(26, 26, 26, 0.8); padding: 2px; border-radius: 2px; font-size: 0.5rem; display: flex; flex-direction: column; overflow: hidden; border: 1px solid transparent; }
-        .cmd-box.is-self { opacity: 0.4; border: 1px dashed #333; }
-        .cmd-header { display: flex; align-items: center; gap: 2px; border-bottom: 1px solid #333; padding-bottom: 1px; margin-bottom: 1px; }
-        .cmd-order { color: #555; font-weight: bold; }
-        .cmd-name-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1; color: #aaa; font-size: 0.4rem; }
-        .cmd-body { display: flex; justify-content: space-around; flex-grow: 1; align-items: center; }
-        .cmd-unit { display: flex; flex-direction: column; align-items: center; gap: 1px; width: 48%; }
-        .cmd-side-label { color: #444; font-size: 0.4rem; line-height: 1; }
-        .cmd-val-wrap { display: flex; align-items: center; gap: 1px; }
-        .cmd-val { font-size: 0.8rem; font-weight: bold; min-width: 12px; text-align: center; transition: color 0.3s; }
-        .btn-cmd { width: 14px; height: 14px; font-size: 0.6rem; background: #333; color: #fff; border: none; border-radius: 2px; cursor: pointer; }
+        /* 背景色の状態 */
+        body.state-none { background: #111 !important; }
+        body.state-day { background: #4a3a05 !important; }
+        body.state-night { background: #1a1b3a !important; }
     </style>
 </head>
 <body class="state-none">
