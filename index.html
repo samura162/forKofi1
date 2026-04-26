@@ -28,7 +28,12 @@
 
         /* 名前エリア */
         .header-area { height: 20px; display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
-        .name-select { background: #222; color: #fff; border: none; font-size: 0.7rem; width: 70px; height: 16px; }
+.name-select { 
+    background: #222; color: #fff; border: none; 
+    font-size: 0.7rem !important; /* ここでプレイヤー名のサイズを固定 */
+    width: 70px; height: 16px; 
+}
+
 
         /* 中段：ライフと右サイドカウンター */
         .main-display-wrapper { height: 42%; display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
@@ -58,7 +63,12 @@
             background: #1a1a1a; border: 1px solid #222; padding: 1px; 
             display: flex; flex-direction: column; justify-content: center; min-height: 0;
         }
-        .cmd-header { font-size: 4px !important; color: #555; text-align: center; line-height: 1; } /* A, Bの文字を小さく */
+        .commander-area .cmd-header { 
+    font-size: 4px !important; /* ここを小さくすると A と B だけが縮みます */
+    color: #555; 
+    text-align: center; 
+    line-height: 1; 
+}
         .cmd-body { display: flex; justify-content: space-around; align-items: center; }
         .cmd-val { font-size: 1rem !important; font-weight: bold; color: #ff9800; min-width: 15px; text-align: center; } /* 数値だけ大きく */
 
