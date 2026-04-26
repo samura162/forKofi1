@@ -347,7 +347,8 @@
                         cmdArea.insertAdjacentHTML('beforeend', boxHtml);
                     });
                 }
-        });
+            }); // ← これを足す
+        }); // ← もともとある分
 
         window.changeValue = (path, delta) => {
             rootRef.child(path).transaction(c => {
