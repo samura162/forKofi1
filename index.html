@@ -6,18 +6,12 @@
     <title>Samura's MTG Commander Life Counter</title>
     <link rel="icon" href="favicon.png" type="image/png">
     <style>
+        /* 1. 全体設定：スクロールを許可し、4分割を維持 */
         * { box-sizing: border-box; }
         html, body { 
             margin: 0; padding: 0; height: 100vh; width: 100vw; 
-            background: #111; color: #fff; font-family: 'Helvetica', sans-serif; 
-            overflow: hidden; 
-        }
-
-        /* ヘッダーの固定 */
-        .app-header {
-            height: 5vh; display: flex; justify-content: space-between; 
-            align-items: center; padding: 0 15px; background: #000;
-            border-bottom: 1px solid #333;
+            background: #111; color: #fff; font-family: sans-serif; 
+            overflow: hidden; /* 対面使用時は画面全体を固定 */
         }
 
         /* 4分割グリッド */
@@ -25,72 +19,69 @@
             display: grid; 
             grid-template-columns: 1fr 1fr; 
             grid-template-rows: 1fr 1fr; 
-            height: 95vh; 
-            width: 100%; 
-            gap: 2px;
-            background: #333; /* 境界線代わり */
+            height: 96vh; /* ヘッダーを引いた全画面 */
+            width: 100%; gap: 2px; padding: 2px;
         }
 
         /* 各プレイヤーボックス */
         .player-box { 
             background: #1a1a1a; 
-            display: flex; 
-            flex-direction: column; 
-            padding: 8px; 
-            overflow: hidden;
-            position: relative;
+            display: flex; flex-direction: column; 
+            padding: 4px; border: 1px solid #333; 
+            overflow: hidden; /* ボックス内での重なりを防ぐ */
         }
 
-        /* 名前とチェックボックスのエリア */
-        .header-area {
-            display: flex; align-items: center; gap: 8px; height: 15%;
-        }
-        .order-num { font-size: 1.5rem; color: #555; font-weight: bold; }
-        .name-select { background: #222; color: #fff; border: 1px solid #444; font-size: 1rem; flex-grow: 1; }
-
-        /* ライフとサイドカウンターのエリア */
+        /* ライフとサイドバーのエリア */
         .main-display-wrapper { 
-            display: flex; height: 45%; align-items: center; gap: 10px;
+            display: flex; flex: 2; /* ライフエリアを広く */
+            align-items: center; gap: 5px; min-height: 0;
         }
-        .life-center-unit { flex: 2; text-align: center; }
         .life { 
-            font-size: 12vh !important; font-weight: bold; background: transparent; 
-            border: none; color: #4caf50; width: 100%; text-align: center;
+            font-size: 13vh !important; font-weight: bold; color: #4caf50; 
+            text-align: center; border: none; background: transparent; width: 100%;
         }
-        .life-btn-group { display: flex; gap: 5px; justify-content: center; }
 
-        /* サイドバー（毒・RADなど）を右側に寄せる */
+        /* サイドバー（毒・RAD）の重なり防止 */
         .sidebar-counters { 
-            flex: 1; display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem;
+            flex: 1; display: flex; flex-direction: column; gap: 2px;
+            font-size: 0.7rem; min-height: 0;
         }
         .side-item { 
-            display: flex; justify-content: space-between; align-items: center;
-            background: #252525; padding: 4px; border-radius: 4px;
+            background: #222; padding: 2px; border-radius: 4px; gap: 2px;
         }
 
-        /* コマンダーダメージエリア（ここが一番重要） */
+        /* コマンダーダメージエリア（3と4の重なりを解消） */
         .commander-area { 
+            flex: 1.5; /* ここを調整 */
             display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; 
-            gap: 4px; height: 35%; margin-top: auto;
+            gap: 2px; margin-top: auto;
         }
         .cmd-box { 
-            background: #222; border: 1px solid #333; padding: 4px; 
-            display: flex; flex-direction: column; justify-content: center;
-            border-radius: 4px;
+            background: #252525; padding: 2px; border-radius: 4px; 
+            font-size: 0.6rem; border: 1px solid #444;
+            display: flex; flex-direction: column; justify-content: space-around;
         }
-        .cmd-header { font-size: 0.6rem; color: #888; margin-bottom: 2px; }
-        .cmd-body { display: flex; justify-content: space-around; align-items: center; }
-        .cmd-val { font-size: 1.2rem; font-weight: bold; color: #ff9800; }
-
-        /* ボタン類の共通スタイル */
-        button { cursor: pointer; border: none; border-radius: 4px; color: #fff; background: #333; }
-        .btn-plus { background: #2e7d32; }
-        .btn-minus { background: #c62828; }
-        .dice-btn { font-size: 0.7rem; padding: 4px; background: #444; }
+        .cmd-val { font-size: 1.1rem; font-weight: bold; color: #ff9800; }
         
-        /* 状態変化 */
-        body.state-day { background: #3e2723 !important; }
-        body.state-night { background: #1a237e !important; }
+        /* ボタンと入力欄のサイズ調整（ここが重要） */
+        button, select, input { 
+            height: auto !important; /* 固定高を解除 */
+            padding: 2px !important; /* パディングを縮小 */
+            margin: 0 !important;
+            font-size: 0.7rem !important;
+        }
+        .btn-plus { background: #2e7d32; color: #fff; }
+        .btn-minus { background: #c62828; color: #fff; }
+        .btn-cmd, .btn-side { width: 18px; height: 18px; } /* コマンダー/サイドボタンを小さく */
+
+        /* ダイスロール欄（Player 3/4での重なり防止） */
+        .side-dice-wrapper { 
+            background: #222; padding: 2px; border-radius: 4px; 
+            display: flex; flex-direction: column; gap: 1px;
+            margin-top: 1px;
+        }
+        .dice-input { width: 45px; } /* 入力欄を狭く */
+        .dice-btn { font-size: 0.6rem; }
     </style>
 </head>
 <body class="state-none">
