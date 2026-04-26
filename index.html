@@ -347,6 +347,7 @@
                         cmdArea.insertAdjacentHTML('beforeend', boxHtml);
                     });
                 }
+        });
 
         window.changeValue = (path, delta) => {
             rootRef.child(path).transaction(c => {
