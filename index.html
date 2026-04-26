@@ -9,81 +9,88 @@
         * { box-sizing: border-box; }
         html, body { 
             margin: 0; padding: 0; height: 100vh; width: 100vw; 
-            background: #111; color: #fff; font-family: sans-serif; 
-            overflow: hidden; /* 対面使用時に画面が動かないよう固定 */
+            background: #111; color: #fff; font-family: 'Helvetica', sans-serif; 
+            overflow: hidden; 
         }
 
-        /* 4分割レイアウトを維持 */
+        /* ヘッダーの固定 */
+        .app-header {
+            height: 5vh; display: flex; justify-content: space-between; 
+            align-items: center; padding: 0 15px; background: #000;
+            border-bottom: 1px solid #333;
+        }
+
+        /* 4分割グリッド */
         .grid { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
             grid-template-rows: 1fr 1fr; 
-            height: 96vh; /* ヘッダー分を引いた全画面 */
+            height: 95vh; 
             width: 100%; 
-            gap: 4px; 
-            padding: 4px;
+            gap: 2px;
+            background: #333; /* 境界線代わり */
         }
 
-        /* 各プレイヤーボックス：潰れないように最小高さを設定 */
+        /* 各プレイヤーボックス */
         .player-box { 
-            background: rgba(34, 34, 34, 0.7); 
+            background: #1a1a1a; 
             display: flex; 
             flex-direction: column; 
-            justify-content: space-between; /* 要素を上下いっぱいに配置 */
-            padding: 4px; 
-            border: 1px solid #333; 
-            overflow: hidden; 
-            min-height: 0; /* グリッド内での圧縮を許可しつつ、中身で調整 */
+            padding: 8px; 
+            overflow: hidden;
+            position: relative;
         }
 
-        /* ライフ表示：フォントサイズを画面高に対して最適化 */
+        /* 名前とチェックボックスのエリア */
+        .header-area {
+            display: flex; align-items: center; gap: 8px; height: 15%;
+        }
+        .order-num { font-size: 1.5rem; color: #555; font-weight: bold; }
+        .name-select { background: #222; color: #fff; border: 1px solid #444; font-size: 1rem; flex-grow: 1; }
+
+        /* ライフとサイドカウンターのエリア */
         .main-display-wrapper { 
-            flex: 2; /* ライフエリアを優先的に広く取る */
-            display: flex; 
-            align-items: center; 
-            justify-content: space-around; 
-            gap: 2px;
-            min-height: 0;
+            display: flex; height: 45%; align-items: center; gap: 10px;
         }
+        .life-center-unit { flex: 2; text-align: center; }
         .life { 
-            font-size: 15vh !important; /* 画面の高さに合わせて巨大化 */
-            font-weight: bold; 
-            border: none; 
-            background: transparent; 
-            color: #fff; 
-            width: 100%; 
-            text-align: center; 
-            outline: none; 
+            font-size: 12vh !important; font-weight: bold; background: transparent; 
+            border: none; color: #4caf50; width: 100%; text-align: center;
+        }
+        .life-btn-group { display: flex; gap: 5px; justify-content: center; }
+
+        /* サイドバー（毒・RADなど）を右側に寄せる */
+        .sidebar-counters { 
+            flex: 1; display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem;
+        }
+        .side-item { 
+            display: flex; justify-content: space-between; align-items: center;
+            background: #252525; padding: 4px; border-radius: 4px;
         }
 
-        /* サイドバーとコマンダーエリア：文字が被らないようサイズ調整 */
-        .sidebar-counters { width: 35%; display: flex; flex-direction: column; gap: 2px; }
-        .side-item { font-size: 0.7rem; padding: 2px; }
-        
+        /* コマンダーダメージエリア（ここが一番重要） */
         .commander-area { 
-            flex: 1.5; /* コマンダーダメージエリア */
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            grid-template-rows: 1fr 1fr; 
-            gap: 2px; 
+            display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; 
+            gap: 4px; height: 35%; margin-top: auto;
         }
-        .cmd-box { font-size: 0.6rem; padding: 2px; border: 1px solid #444; }
+        .cmd-box { 
+            background: #222; border: 1px solid #333; padding: 4px; 
+            display: flex; flex-direction: column; justify-content: center;
+            border-radius: 4px;
+        }
+        .cmd-header { font-size: 0.6rem; color: #888; margin-bottom: 2px; }
+        .cmd-body { display: flex; justify-content: space-around; align-items: center; }
+        .cmd-val { font-size: 1.2rem; font-weight: bold; color: #ff9800; }
 
-        /* ヘッダー */
-        .app-header {
-            height: 4vh; display: flex; justify-content: space-between; 
-            align-items: center; padding: 0 10px; background: rgba(0, 0, 0, 0.8);
-        }
+        /* ボタン類の共通スタイル */
+        button { cursor: pointer; border: none; border-radius: 4px; color: #fff; background: #333; }
+        .btn-plus { background: #2e7d32; }
+        .btn-minus { background: #c62828; }
+        .dice-btn { font-size: 0.7rem; padding: 4px; background: #444; }
         
-        /* 共通ボタン */
-        .btn-life { height: 35px; font-size: 1.1rem; }
-        .btn-minus { background: #d32f2f; color: #fff; }
-        .btn-plus { background: #388e3c; color: #fff; }
-
-        /* 背景色の状態 */
-        body.state-none { background: #111 !important; }
-        body.state-day { background: #4a3a05 !important; }
-        body.state-night { background: #1a1b3a !important; }
+        /* 状態変化 */
+        body.state-day { background: #3e2723 !important; }
+        body.state-night { background: #1a237e !important; }
     </style>
 </head>
 <body class="state-none">
