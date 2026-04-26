@@ -13,7 +13,6 @@
             overflow: hidden; 
         }
 
-        /* 4分割を厳密に固定 */
         .grid { 
             display: grid; 
             grid-template-columns: 50% 50%; 
@@ -26,44 +25,38 @@
             display: flex; flex-direction: column; padding: 2px; overflow: hidden; 
         }
 
-        #slot-P1 { grid-area: 1 / 1 / 2 / 2; } /* 左上 */
-        #slot-P2 { grid-area: 1 / 2 / 2 / 3; } /* 右上 */
-        #slot-P3 { grid-area: 2 / 2 / 3 / 3; } /* 右下 (ここを3にする) */
-        #slot-P4 { grid-area: 2 / 1 / 3 / 2; } /* 左下 (ここを4にする) */
+        #slot-P1 { grid-area: 1 / 1 / 2 / 2; } 
+        #slot-P2 { grid-area: 1 / 2 / 2 / 3; } 
+        #slot-P3 { grid-area: 2 / 2 / 3 / 3; } 
+        #slot-P4 { grid-area: 2 / 1 / 3 / 2; } 
 
-        /* 名前エリア */
         .header-area { height: 20px; display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
 .name-select { 
     background: #222; color: #fff; border: none; 
-    font-size: 0.7rem !important; /* ここでプレイヤー名のサイズを固定 */
+    font-size: 0.7rem !important; 
     width: 70px; height: 16px; 
 }
 
-
-        /* 中段：ライフと右サイドカウンター */
         .main-display-wrapper { height: 42%; display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
         .life-center-unit { flex: 1.5; display: flex; flex-direction: column; align-items: center; }
         .life { font-size: 7vh !important; font-weight: bold; color: #4caf50; border: none; background: transparent; text-align: center; width: 100%; padding: 0; }
         .life-btn-group { display: flex; gap: 2px; }
         .btn-life { width: 28px; height: 18px; font-size: 0.7rem; border: none; cursor: pointer; color: #fff; border-radius: 3px; }
 
-        /* サイドバー：フォントをさらに小さく */
         .sidebar-counters { width: 85px; display: flex; flex-direction: column; gap: 1px; }
         .side-item { background: #1a1a1a; padding: 1px 2px; display: flex; justify-content: space-between; font-size: 0.5rem; border-radius: 2px; }
-        .side-label { font-size: 0.5rem !important; transform: scale(0.9); } /* CMD Castsなどの文字 */
+        .side-label { font-size: 0.5rem !important; transform: scale(0.9); }
         .btn-side, .btn-cmd { 
     width: 14px; 
     height: 14px; 
     font-size: 0.6rem; 
 }
 
-        /* ダイスエリア：フォントを最小化 */
         .side-dice-wrapper { background: #1a1a1a; padding: 1px; border-radius: 2px; }
         .dice-input { width: 35px; height: 14px; font-size: 0.5rem; }
         .dice-btn { font-size: 0.5rem !important; padding: 1px !important; }
         .dice-result { font-size: 0.6rem !important; color: #ffeb3b; text-align: center; }
 
-        /* 下段：統率者ダメージエリア（枠を小さく、数値は大きく） */
         .commander-area { 
     flex-grow: 1; 
     display: grid; 
@@ -81,7 +74,7 @@
     justify-content: center;
 }
         .commander-area .cmd-header { 
-    font-size: 6px !important; /* ここの数値をさらに下げれば A/B も小さくなります */
+    font-size: 6px !important; 
     color: #555; 
     text-align: center; 
     line-height: 1.1; 
@@ -92,12 +85,32 @@
     font-weight: bold; 
     color: #ff9800; 
 }
-        .cmd-side-label {
-    font-size: 5px !important; 
-    color: #ffffff !important; 
-    text-align: center;
+.cmd-side-label {
+    font-size: 7px !important; 
+    color: #ffffff !important;
+    font-weight: bold !important;
+    text-shadow: 0 0 3px #000;
+    
+    display: block !important;    
+    width: 100% !important;       
+    text-align: center !important; 
+    margin-bottom: 2px;           
 }
-        /* ヘッダー */
+
+.cmd-unit {
+    display: flex !important;
+    flex-direction: column !important; 
+    align-items: center !important; 
+    width: 100% !important;
+}
+
+.cmd-val-wrap {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important; 
+    width: 100% !important;
+}
+
         .app-header { height: 4vh; display: flex; justify-content: space-between; align-items: center; padding: 0 10px; background: #000; }
         .header-btns button, .day-night-select { font-size: 0.55rem; padding: 1px 4px; height: 18px; }
 
