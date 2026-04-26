@@ -25,57 +25,55 @@
             display: flex; flex-direction: column; padding: 2px; overflow: hidden;
         }
 
-        /* 1. 名前と右側の重なりを解消 */
+        /* 1. 名前エリア：右側のカウンターと被らないよう高さを確保 */
         .header-area { 
             display: flex; align-items: center; justify-content: space-between; 
-            height: 22px; flex-shrink: 0; padding: 0 4px;
+            height: 25px; flex-shrink: 0; padding: 0 4px;
         }
-        .partner-wrapper { display: flex; align-items: center; gap: 2px; font-size: 0.7rem; }
-        .name-select { 
-            background: #222; color: #fff; border: none; font-size: 0.75rem; 
-            width: 80px; height: 18px; /* 幅を制限して右とぶつからないようにする */
-        }
+        .name-select { background: #222; color: #fff; border: none; font-size: 0.75rem; width: 80px; }
 
-        /* 2. メインエリア：ライフを中央、カウンターを右端に分離 */
+        /* 2. メインエリア：3つのブロックに分けて重なりを物理的に防ぐ */
         .main-display-wrapper { 
-            display: flex; flex: 1.2; min-height: 0; align-items: center; position: relative;
+            display: flex; flex: 1.5; min-height: 0; align-items: center;
         }
+        
+        /* ライフ（中央） */
         .life-center-unit { 
-            flex-grow: 1; display: flex; flex-direction: column; align-items: center;
-            margin-right: 95px; /* 右側のカウンター用のスペースを絶対確保 */
+            flex: 2; display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-        .life { font-size: 7vh !important; font-weight: bold; color: #4caf50; border: none; background: transparent; }
-        .life-btn-group { display: flex; gap: 4px; }
-        .btn-life { width: 30px; height: 22px; font-size: 0.8rem; }
+        .life { font-size: 7vh !important; font-weight: bold; color: #4caf50; border: none; background: transparent; width: 100%; text-align: center; }
+        .life-btn-group { display: flex; gap: 2px; }
+        .btn-life { width: 35px; height: 25px; font-size: 0.9rem; }
 
-        /* 右端カウンター：ライフと被らないように独立させる */
+        /* カウンター類（右側）：ここがヘッダーと被らないようマージンを調整 */
         .sidebar-counters { 
-            position: absolute; right: 0; width: 90px; 
-            display: flex; flex-direction: column; gap: 1px;
+            flex: 1; display: flex; flex-direction: column; gap: 1px; 
+            padding-right: 2px; justify-content: center;
         }
-        .side-item { background: #1a1a1a; padding: 1px 2px; display: flex; justify-content: space-between; border-radius: 2px; font-size: 0.55rem; }
+        .side-item { background: #1a1a1a; padding: 1px 3px; display: flex; justify-content: space-between; border-radius: 2px; font-size: 0.55rem; }
         .btn-side { width: 14px; height: 14px; font-size: 0.5rem; }
         
-        /* ダイスエリア */
-        .side-dice-wrapper { background: #1a1a1a; padding: 1px; border-radius: 2px; }
-        .dice-input { width: 35px; height: 15px; font-size: 0.55rem; border: none; background: #333; color: #fff; }
+        /* ダイスエリア：巨大化を防ぐ */
+        .side-dice-wrapper { background: #1a1a1a; padding: 2px; border-radius: 2px; }
+        .dice-input { width: 40px; height: 16px; font-size: 0.6rem; border: none; background: #333; color: #fff; }
+        .dice-format, .dice-result { font-size: 0.6rem !important; font-weight: bold; color: #ffeb3b; text-align: center; }
 
-        /* 3. 下段ダメージエリア：高さを自動計算して収める */
+        /* 3. 下段ダメージエリア */
         .commander-area { 
-            flex: 1.1; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; 
+            flex: 1.2; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; 
             gap: 1px; min-height: 0;
         }
         .cmd-box { 
             background: #151515; border: 1px solid #222; padding: 1px; 
             display: flex; flex-direction: column; justify-content: center;
         }
-        .cmd-header { font-size: 0.5rem; color: #555; text-align: center; }
+        .cmd-header { font-size: 0.5rem; color: #555; text-align: center; white-space: nowrap; }
         .cmd-body { display: flex; justify-content: space-around; align-items: center; }
-        .cmd-val { font-size: 0.75rem; font-weight: bold; color: #ff9800; }
-        .btn-cmd { width: 14px; height: 14px; font-size: 0.5rem; }
+        .cmd-val { font-size: 0.8rem; font-weight: bold; color: #ff9800; }
+        .btn-cmd { width: 15px; height: 15px; font-size: 0.5rem; }
 
         /* ヘッダー */
-        .app-header { height: 5vh; display: flex; justify-content: space-between; align-items: center; padding: 0 10px; background: #000; }
+        .app-header { height: 5vh; display: flex; justify-content: space-between; align-items: center; padding: 0 10px; background: #000; border-bottom: 1px solid #222; }
         .header-btns button, .day-night-select { font-size: 0.6rem; padding: 2px 4px; }
         
         button { cursor: pointer; border: none; border-radius: 2px; color: #fff; background: #333; }
