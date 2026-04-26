@@ -218,14 +218,11 @@
             clearInterval(interval);
             const shuffled = [...currentNames].sort(() => Math.random() - 0.5);
             
-            // 重要：個別に directInput するのではなく、一括更新用のオブジェクトを作る
             const updates = {};
             playerSlots.forEach((slot, i) => {
                 updates[`${slot}/name`] = shuffled[i] || "";
                 document.getElementById(`slot-${slot}`).classList.remove('shuffling');
             });
-
-            // Firebaseへ一括送信（これにより、リスナーの実行が一度だけで済む）
             rootRef.update(updates);
         }
     }, 80);
@@ -246,28 +243,42 @@
         };
 
         memberRef.on('value', s => {
-            const m = s.val() || [];
-            playerSlots.forEach(slot => {
-                const sel = document.getElementById(`name-${slot}`);
-                const cur = sel.value;
-                sel.innerHTML = '<option value="">select nickname</option>' + m.map(v => `<option value="${v}">${v}</option>`).join('');
-                if(cur) sel.value = cur;
-            });
-        });
+    const m = s.val() || [];
+    playerSlots.forEach(slot => {
+        const sel = document.getElementById(`name-${slot}`);
+        const currentVal = sel.value; 
+        
+        let options = '<option value="">select nickname</option>';
+        m.forEach(v => {
+            options += `<option value="${v}">${v}</option>`;
+        });
+        sel.innerHTML = options;
+        
+        if (m.includes(currentVal)) {
+            sel.value = currentVal;
+        } else {
+        }
+    });
+});
 
         rootRef.on('value', s => {
-            const d = s.val() || {};
-            const dnState = d.dayNight || "none";
-            const dnSelect = document.getElementById('day-night-ctrl');
-            if (dnSelect && document.activeElement !== dnSelect) dnSelect.value = dnState;
-            document.body.className = `state-${dnState}`;
+            const d = s.val() || {};
+            const dnState = d.dayNight || "none";
+            const dnSelect = document.getElementById('day-night-ctrl');
+            if (dnSelect && document.activeElement !== dnSelect) dnSelect.value = dnState;
+            document.body.className = `state-${dnState}`;
 
-            playerSlots.forEach((target, targetIdx) => {
-                const p = d[target] || {};
-                const nameSel = document.getElementById(`name-${target}`);
-                if (nameSel && document.activeElement !== nameSel) nameSel.value = p.name || "";
-                const check = document.getElementById(`check-${target}`);
-                if (check) check.checked = !!p.isPartner;
+            playerSlots.forEach((target, targetIdx) => {
+                const p = d[target] || {};
+                const nameSel = document.getElementById(`name-${target}`);
+                const slotBox = document.getElementById(`slot-${target}`); 
+
+                if (nameSel && document.activeElement !== nameSel && !slotBox.classList.contains('shuffling')) {
+                    nameSel.value = p.name || "";
+                }
+
+                const check = document.getElementById(`check-${target}`);
+                if (check) check.checked = !!p.isPartner;
 
                 document.getElementById(`dice-fmt-${target}`).innerText = p.diceFormat || "";
                 document.getElementById(`dice-res-${target}`).innerText = p.diceResult || "--";
