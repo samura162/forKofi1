@@ -23,8 +23,13 @@
 
         .player-box { 
             background: #111; border: 1px solid #333;
-            display: flex; flex-direction: column; padding: 2px; overflow: hidden;
+            display: flex; flex-direction: column; padding: 2px; overflow: hidden; 
         }
+
+        #slot-P1 { grid-area: 1 / 1 / 2 / 2; } /* 左上 */
+        #slot-P2 { grid-area: 1 / 2 / 2 / 3; } /* 右上 */
+        #slot-P3 { grid-area: 2 / 2 / 3 / 3; } /* 右下 (ここを3にする) */
+        #slot-P4 { grid-area: 2 / 1 / 3 / 2; } /* 左下 (ここを4にする) */
 
         /* 名前エリア */
         .header-area { height: 20px; display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
