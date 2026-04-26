@@ -13,52 +13,61 @@
             overflow: hidden; 
         }
 
-        /* 4分割を厳格に固定 */
+        /* 4分割を厳密に固定 */
         .grid { 
             display: grid; 
             grid-template-columns: 50% 50%; 
-            grid-template-rows: 48% 48%; /* ヘッダー分を考慮 */
+            grid-template-rows: calc(50% - 2.5vh) calc(50% - 2.5vh); /* ヘッダー分を正確に除外 */
             height: 95vh; width: 100%; gap: 2px; padding: 2px;
         }
 
         .player-box { 
-            background: #151515; border: 1px solid #333;
+            background: #111; border: 1px solid #333;
             display: flex; flex-direction: column; padding: 4px; overflow: hidden;
+            justify-content: flex-start;
         }
 
-        /* 名前エリア：高さを最小限に */
-        .header-area { display: flex; align-items: center; gap: 4px; height: 30px; }
-        .order-num { font-size: 1rem; color: #666; }
-        .name-select { background: #222; color: #fff; border: none; font-size: 0.8rem; flex-grow: 1; }
+        /* 名前エリア：一行に収める */
+        .header-area { display: flex; align-items: center; gap: 4px; height: 25px; flex-shrink: 0; }
+        .order-num { font-size: 0.9rem; color: #666; }
+        .name-select { background: #222; color: #fff; border: none; font-size: 0.75rem; flex-grow: 1; height: 20px; }
 
-        /* メイン（ライフと右サイド） */
-        .main-display-wrapper { display: flex; flex-grow: 1; min-height: 0; }
-        
-        /* ライフを中央に */
-        .life-center-unit { flex: 1.2; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .life { font-size: 10vh !important; font-weight: bold; color: #4caf50; width: 100%; text-align: center; border: none; background: transparent; }
-        .life-btn-group { display: flex; gap: 4px; }
-        .btn-life { width: 40px; height: 30px; font-size: 1rem; border-radius: 4px; border: none; cursor: pointer; color: #fff; }
+        /* 中段：ライフとサイドバー */
+        .main-display-wrapper { 
+            display: flex; height: 40%; align-items: center; gap: 4px; flex-shrink: 0;
+        }
+        .life-center-unit { flex: 1.5; display: flex; flex-direction: column; align-items: center; }
+        .life { font-size: 8vh !important; font-weight: bold; color: #4caf50; width: 100%; text-align: center; border: none; background: transparent; padding: 0; height: auto; }
+        .life-btn-group { display: flex; gap: 2px; }
+        .btn-life { width: 35px; height: 25px; font-size: 0.9rem; }
 
-        /* サイドバー（毒など）：ここをコンパクトに */
-        .sidebar-counters { width: 100px; display: flex; flex-direction: column; gap: 2px; justify-content: center; }
-        .side-item { background: #222; padding: 1px 4px; display: flex; justify-content: space-between; align-items: center; border-radius: 3px; font-size: 0.6rem; }
-        .btn-side { width: 16px; height: 16px; font-size: 0.6rem; background: #444; color: #fff; border: none; }
+        /* サイドバー（毒・ダイス）：ここをさらに圧縮 */
+        .sidebar-counters { width: 90px; display: flex; flex-direction: column; gap: 1px; }
+        .side-item { background: #1a1a1a; padding: 1px 3px; display: flex; justify-content: space-between; border-radius: 2px; font-size: 0.55rem; }
+        .btn-side { width: 14px; height: 14px; font-size: 0.5rem; }
+        .side-dice-wrapper { background: #1a1a1a; padding: 2px; border-radius: 2px; font-size: 0.55rem; }
+        .dice-input { width: 35px; height: 16px; font-size: 0.55rem; }
 
-        /* コマンダーエリア：ここが崩れないようにグリッドを固定 */
+        /* 下段：統率者ダメージエリア（ここが隠れないように自動調整） */
         .commander-area { 
-            height: 85px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px; 
+            flex-grow: 1; /* 余ったスペースをすべて使う */
+            display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; 
+            gap: 2px; min-height: 0; padding-top: 2px;
         }
-        .cmd-box { background: #222; border: 1px solid #333; padding: 2px; border-radius: 3px; display: flex; flex-direction: column; justify-content: center; }
-        .cmd-header { font-size: 0.5rem; color: #777; white-space: nowrap; overflow: hidden; }
+        .cmd-box { 
+            background: #1a1a1a; border: 1px solid #222; padding: 1px; 
+            display: flex; flex-direction: column; justify-content: center; min-height: 0;
+        }
+        .cmd-header { font-size: 0.5rem; color: #777; line-height: 1; }
         .cmd-body { display: flex; justify-content: space-around; align-items: center; }
-        .cmd-val { font-size: 0.9rem; font-weight: bold; color: #ff9800; }
-        .btn-cmd { width: 18px; height: 18px; font-size: 0.7rem; background: #444; color: #fff; border: none; }
+        .cmd-val { font-size: 0.8rem; font-weight: bold; color: #ff9800; }
+        .btn-cmd { width: 16px; height: 16px; font-size: 0.6rem; }
 
         /* ヘッダー */
-        .app-header { height: 5vh; display: flex; justify-content: space-between; align-items: center; padding: 0 10px; background: #000; }
-        .day-night-select, .order-btn, .reset-btn { font-size: 0.6rem; padding: 2px 5px; }
+        .app-header { height: 5vh; display: flex; justify-content: space-between; align-items: center; padding: 0 10px; background: #000; border-bottom: 1px solid #222; }
+        .header-btns button, .day-night-select { font-size: 0.6rem; padding: 2px 4px; height: 22px; }
         
+        button { cursor: pointer; border: none; border-radius: 2px; color: #fff; background: #333; }
         .btn-plus { background: #2e7d32; }
         .btn-minus { background: #c62828; }
     </style>
